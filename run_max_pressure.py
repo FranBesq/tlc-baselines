@@ -8,9 +8,9 @@ import argparse
 
 # parse args
 parser = argparse.ArgumentParser(description='Run Example')
-parser.add_argument('config_file', type=str, help='path of config file')
+parser.add_argument('--config_file', type=str, default='./data/jinan_3_4/config.json', help='path of config file')    
 parser.add_argument('--thread', type=int, default=1, help='number of threads')
-parser.add_argument('--steps', type=int, default=100, help='number of steps')
+parser.add_argument('--steps', type=int, default=10000, help='number of steps')
 parser.add_argument('--delta_t', type=int, default=20, help='how often agent make decisions')
 args = parser.parse_args()
 
@@ -41,10 +41,14 @@ for i in range(args.steps):
         actions.append(agent.get_action(obs[agent_id]))
     obs, rewards, dones, info = env.step(actions)
     #print(world.intersections[0]._current_phase, end=",")
-    print(obs, actions)
-    print(env.eng.get_average_travel_time())
+    
+    #print(env.eng.get_average_travel_time())
     #print(obs)
     #print(rewards)
-    # print(info["metric"])
+
+    # //LOGear esto AQUI
+    print("Average travel time: " + str(info["metric"]))
+    print(obs, actions)
+    #print(rewards)
 
 #print("Final Travel Time is %.4f" % env.metric.update(done=True))

@@ -12,11 +12,13 @@ import os
 def parse_args():
     parser = argparse.ArgumentParser(description='Run Example')
     # Environment
-    parser.add_argument('config_file', type=str, help='path of config file')
-    parser.add_argument('--thread', type=int, default=1, help='number of threads')
-    parser.add_argument('--steps', type=int, default=3600, help='number of steps')
+    parser.add_argument('--map', type=str, default='jinan_3_4', help='path of config file')    
+    parser.add_argument('--config_file', type=str, default='./data/jinan_3_4/config.json', help='path of config file')    
+    parser.add_argument('--data_dir', type=str, default='./data/', help='path of data dir')
+    parser.add_argument('--thread', type=int, default=2, help='number of threads')
+    parser.add_argument('--steps', type=int, default=1000, help='number of steps')#1000 for jinan, 
     parser.add_argument('--action_interval', type=int, default=20, help='how often agent make decisions')
-    parser.add_argument('--episodes', type=int, default=2000, help='training episodes')
+    parser.add_argument('--episodes', type=int, default=100, help='training episodes')#100
     parser.add_argument('--pretrain_episodes', type=int, default=100, help='pre-training episodes')
     # Core training parameters
     parser.add_argument("--lr", type=float, default=1e-2, help="learning rate for Adam optimizer")
@@ -27,8 +29,25 @@ def parse_args():
     # Checkpointing
     parser.add_argument("--save-dir", type=str, default="model/maddpg/", help="directory in which model should be saved")
     parser.add_argument("--save-rate", type=int, default=3, help="save model once every time this many episodes are completed")
+    parser.add_argument("--log-dir", type=str, default="log/maddqg", help="Logs metric by episode")
     return parser.parse_args()
+
 args = parse_args()
+args.config_file = os.path.join(args.data_dir, "{}/config.json".format(args.map))
+args.save_dir = args.save_dir + args.map + "/"
+args.log_dir = args.log_dir + args.map
+
+# Initialize logger
+if not os.path.exists(args.log_dir):
+    os.makedirs(args.log_dir)
+logger = logging.getLogger('main')
+logger.setLevel(logging.DEBUG)
+fh = logging.FileHandler(os.path.join(args.log_dir, datetime.now().strftime('%Y%m%d-%H%M%S') + ".log"))
+fh.setLevel(logging.DEBUG)
+sh = logging.StreamHandler()
+sh.setLevel(logging.INFO)
+logger.addHandler(fh)
+logger.addHandler(sh)
 
 # create world
 world = World(args.config_file, thread_num=args.thread)
@@ -154,11 +173,11 @@ def train():
                 if not os.path.exists(args.save_dir):
                     os.makedirs(args.save_dir)
                 current_result = evaluate()
-                print("current_result, episode:{}/{}, result:{}".format(e, args.episodes, current_result))
+                logger.info("current_result, episode:{}/{}, avg_travel_time:{}, ".format(e, args.episodes, current_result))
                 if current_result < best_result:
                     best_result = current_result
                     saver.save(sess, os.path.join(args.save_dir, "maddpg_{}.ckpt".format(e)))
-                    print("best model saved, episode:{}/{}, result:{}".format(e, args.episodes, current_result))
+                    logger.infoprint("best model saved, episode:{}/{}, avg_travel_time:{}".format(e, args.episodes, current_result))
 
 def evaluate():
     obs_n = env.reset()
@@ -192,7 +211,7 @@ def test(model_id=None):
                 done = all(done_n)
                 if done:
                     break
-        print("Final Travel Time is %.4f" % env.eng.get_average_travel_time())
+        logger.info("Final Travel Time is %.4f" % env.eng.get_average_travel_time())
 
 # simulate
 train()

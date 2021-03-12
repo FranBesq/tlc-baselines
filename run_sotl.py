@@ -5,15 +5,19 @@ from generator import LaneVehicleGenerator
 from agent import SOTLAgent
 from metric import TravelTimeMetric
 import argparse
+import os
 
 # parse args
 parser = argparse.ArgumentParser(description='Run Example')
-parser.add_argument('config_file', type=str, help='path of config file')
-parser.add_argument('--thread', type=int, default=1, help='number of threads')
-parser.add_argument('--steps', type=int, default=100, help='number of steps')
+parser.add_argument('--map', type=str, default='jinan_3_4', help='path of config file')    
+parser.add_argument('--data_dir', type=str, default='./data/', help='path of config file')    
+parser.add_argument('--config_file', type=str, default='./data/jinan_3_4/config.json', help='path of config file')    
+parser.add_argument('--thread', type=int, default=2, help='number of threads')
+parser.add_argument('--steps', type=int, default=1000, help='number of steps')
 parser.add_argument('--delta_t', type=int, default=1, help='how often agent make decisions')
 args = parser.parse_args()
 
+args.config_file = os.path.join(args.data_dir, "{}/config.json".format(args.map))
 # create world
 world = World(args.config_file, thread_num=args.thread)
 
@@ -43,4 +47,4 @@ for i in range(args.steps):
     #print(rewards)
     # print(info["metric"])
 
-#print("Final Travel Time is %.4f" % env.metric.update(done=True))
+print("Final Travel Time is %.4f" % env.metric.update(done=True))

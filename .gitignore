@@ -6,3 +6,5 @@ examples/*
 model/
 log/
 local/
+*_replays/
+replay*.txt
