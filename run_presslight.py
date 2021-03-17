@@ -12,11 +12,13 @@ from datetime import datetime
 
 # parse args
 parser = argparse.ArgumentParser(description='Run Example')
-parser.add_argument('config_file', type=str, help='path of config file')
-parser.add_argument('--thread', type=int, default=1, help='number of threads')
-parser.add_argument('--steps', type=int, default=3600, help='number of steps')
-parser.add_argument('--action_interval', type=int, default=20, help='how often agent make decisions')
-parser.add_argument('--episodes', type=int, default=200, help='training episodes')
+parser.add_argument('--map', type=str, default='jinan_3_4', help='path of config file')    
+parser.add_argument('--config_file', type=str, default='./data/jinan_3_4/config.json', help='path of config file')    
+parser.add_argument('--data_dir', type=str, default='./data/', help='path of data dir')
+parser.add_argument('--thread', type=int, default=2, help='number of threads')
+parser.add_argument('--steps', type=int, default=500, help='number of steps')
+parser.add_argument('--action_interval', type=int, default=5, help='how often agent make decisions')
+parser.add_argument('--episodes', type=int, default=100, help='training episodes')
 parser.add_argument('--save_model', action="store_true", default=False)
 parser.add_argument('--load_model', action="store_true", default=False)
 parser.add_argument("--save_rate", type=int, default=20,
@@ -24,6 +26,10 @@ parser.add_argument("--save_rate", type=int, default=20,
 parser.add_argument('--save_dir', type=str, default="model/presslight", help='directory in which model should be saved')
 parser.add_argument('--log_dir', type=str, default="log/presslight", help='directory in which logs should be saved')
 args = parser.parse_args()
+
+args.config_file = os.path.join(args.data_dir, "{}/config.json".format(args.map))
+args.save_dir = args.save_dir + args.map + "/"
+args.log_dir = args.log_dir + args.map
 
 if not os.path.exists(args.log_dir):
     os.makedirs(args.log_dir)
@@ -185,6 +191,6 @@ if __name__ == '__main__':
     # simulate
     # import os
     # os.environ["CUDA_VISIBLE_DEVICES"] = '0, 1'
-    # train(args, env)
-    test()
+    train(args, env)
+    #test()
     # meta_test('/mnt/d/Cityflow/examples/config.json')

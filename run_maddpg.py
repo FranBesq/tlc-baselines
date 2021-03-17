@@ -7,6 +7,8 @@ from metric import TravelTimeMetric
 import argparse
 import tensorflow as tf
 import os
+import logging
+from datetime import datetime 
 
 # parse args
 def parse_args():
@@ -15,17 +17,17 @@ def parse_args():
     parser.add_argument('--map', type=str, default='jinan_3_4', help='path of config file')    
     parser.add_argument('--config_file', type=str, default='./data/jinan_3_4/config.json', help='path of config file')    
     parser.add_argument('--data_dir', type=str, default='./data/', help='path of data dir')
-    parser.add_argument('--thread', type=int, default=2, help='number of threads')
-    parser.add_argument('--steps', type=int, default=1000, help='number of steps')#1000 for jinan, 
-    parser.add_argument('--action_interval', type=int, default=20, help='how often agent make decisions')
-    parser.add_argument('--episodes', type=int, default=100, help='training episodes')#100
+    parser.add_argument('--thread', type=int, default=4, help='number of threads')
+    parser.add_argument('--steps', type=int, default=500, help='number of steps')#1000 for jinan, 1500 ny_16_3
+    parser.add_argument('--action_interval', type=int, default=5, help='how often agent make decisions')
+    parser.add_argument('--episodes', type=int, default=300, help='training episodes')#100
     parser.add_argument('--pretrain_episodes', type=int, default=100, help='pre-training episodes')
     # Core training parameters
     parser.add_argument("--lr", type=float, default=1e-2, help="learning rate for Adam optimizer")
-    parser.add_argument("--gamma", type=float, default=0.95, help="discount factor")
-    parser.add_argument("--epsilon", type=float, default=0.5, help="exploration rate")
+    parser.add_argument("--gamma", type=float, default=0.90, help="discount factor")
+    parser.add_argument("--epsilon", type=float, default=0.2, help="exploration rate")
     parser.add_argument("--batch-size", type=int, default=256, help="number of batches to optimize at the same time")
-    parser.add_argument("--num-units", type=int, default=128, help="number of units in the mlp")
+    parser.add_argument("--num-units", type=int, default=256, help="number of units in the mlp")
     # Checkpointing
     parser.add_argument("--save-dir", type=str, default="model/maddpg/", help="directory in which model should be saved")
     parser.add_argument("--save-rate", type=int, default=3, help="save model once every time this many episodes are completed")
@@ -34,8 +36,8 @@ def parse_args():
 
 args = parse_args()
 args.config_file = os.path.join(args.data_dir, "{}/config.json".format(args.map))
-args.save_dir = args.save_dir + args.map + "/"
-args.log_dir = args.log_dir + args.map
+args.save_dir = args.save_dir + "_" + args.map + "/"
+args.log_dir = args.log_dir + "_" + args.map
 
 # Initialize logger
 if not os.path.exists(args.log_dir):
@@ -177,7 +179,7 @@ def train():
                 if current_result < best_result:
                     best_result = current_result
                     saver.save(sess, os.path.join(args.save_dir, "maddpg_{}.ckpt".format(e)))
-                    logger.infoprint("best model saved, episode:{}/{}, avg_travel_time:{}".format(e, args.episodes, current_result))
+                    logger.info("best model saved, episode:{}/{}, avg_travel_time:{}".format(e, args.episodes, current_result))
 
 def evaluate():
     obs_n = env.reset()

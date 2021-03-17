@@ -14,7 +14,7 @@ parser.add_argument('--data_dir', type=str, default='./data/', help='path of con
 parser.add_argument('--config_file', type=str, default='./data/jinan_3_4/config.json', help='path of config file')    
 parser.add_argument('--thread', type=int, default=2, help='number of threads')
 parser.add_argument('--steps', type=int, default=1000, help='number of steps')
-parser.add_argument('--delta_t', type=int, default=1, help='how often agent make decisions')
+parser.add_argument('--delta_t', type=int, default=5, help='how often agent make decisions')
 args = parser.parse_args()
 
 args.config_file = os.path.join(args.data_dir, "{}/config.json".format(args.map))
